@@ -1,0 +1,23 @@
+{
+    "manifest_version": 2,
+    "name": "Seafile Filelink2",
+    "description": "store attachments on a seafile share",
+    "version": "0.0",
+    "author": "Bastien Coco",
+    "icons": {
+        "64": "images/icon-64px.png",
+        "32": "images/icon-32px.png",
+        "16": "images/icon-16px.png"
+    },
+    "background": {
+        "page": "background.html"
+    },
+    "cloud_file": {
+      "name": "Seafile",
+      "management_url": "management.html",
+      "data_format": "File"
+    },
+    "permissions": [
+      "storage", "*://*/*"
+    ]
+}
