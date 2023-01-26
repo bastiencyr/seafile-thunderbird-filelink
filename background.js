@@ -30,7 +30,7 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
     let token = await s.setToken(password);
 
     //create library on the server, default one is "thunderbird_attachments"
-    let seafLib = await s.createLibraryIfNotExist()
+    let seafLib = await s.createLibraryIfNotExist();
     let repoId = seafLib.id;
     await s.upload(`/`, fileName, fileContent, repoId);
 
@@ -40,7 +40,7 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
     delete uploadInfo.abortcontroller;
     return {
         url: `${downloadLink.link}?dl=1`
-    }
+    };
 
 });
 
@@ -61,12 +61,12 @@ browser.cloudFile.getAllAccounts().then(async (accounts) => {
     let allAccountsInfo = await browser.storage.local.get();
     for (let account of accounts) {
         await browser.cloudFile.updateAccount(account.id, {
-            configured: account.id in allAccountsInfo,
+            configured: account.id in allAccountsInfo
         });
     }
 });
 
 
 browser.cloudFile.onAccountAdded.addListener(account => {
-    log(`Account has been added :` + JSON.stringify(account));
+    log2(`Account has been added :` + JSON.stringify(account));
 });

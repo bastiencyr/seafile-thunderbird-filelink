@@ -13,3 +13,5 @@ yarn-error.log*
 .eslintcache
 package.json
 package-lock.json
+/nbproject/private/
+nbproject

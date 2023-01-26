@@ -20,9 +20,9 @@ class SeafileError extends Error {
 async function goErr(res) {
     try {
         let msg = await res.json();
-        throw new SeafileError(res.status, msg)
+        throw new SeafileError(res.status, msg);
     } catch (e) {
-        throw new SeafileError(res.status, res.statusText)
+        throw new SeafileError(res.status, res.statusText);
     }
 }
 
@@ -64,10 +64,10 @@ class Seafile {
                 return this.token;
 
             } catch (e) {
-                throw new SeafileError(res.status, `1 cannot retreive token: ${e.message}`)
+                throw new SeafileError(res.status, `1 cannot retreive token: ${e.message}`);
             }
         } else {
-            throw new SeafileError(res.status, `2 cannot retreive token: ${res.statusText}`)
+            throw new SeafileError(res.status, `2 cannot retreive token: ${res.statusText}`);
         }
     }
 
@@ -84,9 +84,9 @@ class Seafile {
                 return repos.map(i => ({
                     name: i.name,
                     id: i.id
-                }))
+                }));
             } catch (e) {
-                throw new SeafileError(res.status, e.message)
+                throw new SeafileError(res.status, e.message);
             }
         } else
             goErr(res);
@@ -94,7 +94,7 @@ class Seafile {
 
     async searchLibraryByName(name) {
         let libs = await this.getLibraries();
-        return libs.find(l => l.name == name)
+        return libs.find(l => l.name === name);
     }
 
     async createLibrary(name, desc = 'thunderbird_attachments') {
@@ -115,9 +115,9 @@ class Seafile {
                 return {
                     name: repo.repo_name,
                     id: repo.repo_id
-                }
+                };
             } catch (e) {
-                throw new SeafileError(res.status, e.message)
+                throw new SeafileError(res.status, e.message);
             }
         } else
             goErr(res);
@@ -138,14 +138,14 @@ class Seafile {
         let res = await fetch(endPoint).then((response) => {
             log(response);
             if (response.ok)
-                return true
-            return false
+                return true;
+            return false;
         }).catch((error) => {
             log(error);
             return false;
         });
         if (res)
-            return true
+            return true;
         return false;
         //await goErr(res);
     }
@@ -155,10 +155,10 @@ class Seafile {
         let res = await fetch(endPoint, {
             headers: this.headers
         });
-        if (res.status == 404)
-            return false
+        if (res.status === 404)
+            return false;
         if (res.ok)
-            return true
+            return true;
         // other cases
         await goErr(res);
     }
@@ -175,7 +175,7 @@ class Seafile {
         });
 
         if (res.ok)
-            return path
+            return path;
         await goErr(res);
     }
 
@@ -187,7 +187,7 @@ class Seafile {
         });
         if (res.ok) {
             let uploadLink = await res.json();
-            return `${uploadLink}?ret-json=1`
+            return `${uploadLink}?ret-json=1`;
         }
         await goErr(res);
     }
@@ -226,7 +226,7 @@ class Seafile {
             method: 'POST'
         });
         if (res.ok)
-            return await res.json()
+            return await res.json();
 
         await goErr(res);
     }
@@ -240,9 +240,9 @@ class Seafile {
             let links = await res.json();
             if (links[0]) console.log(links[0]);
             if (links.length > 0)
-                return links[0]
+                return links[0];
             else
-                return await this.createDownloadLink(path, repoId)
+                return await this.createDownloadLink(path, repoId);
 
         }
         await goErr(res);
@@ -250,8 +250,5 @@ class Seafile {
 }
 
 export {
-    Seafile,
-    SeafileError,
-    goErr,
-    log
+    Seafile
 };
