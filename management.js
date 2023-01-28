@@ -1,14 +1,7 @@
 import * as seafile from './seafile-api.mjs';
-let debug = true;
-
-function log(msg) {
-    if (debug)
-        console.log(msg);
-}
 
 async function save() {
 
-    console.group("");
     // extract input value
     let rootUI = document.body;
     let accountId = new URL(location.href).searchParams.get("accountId");
@@ -17,7 +10,7 @@ async function save() {
     let username = rootUI.querySelector('#username');
     let password = rootUI.querySelector('#password');
     let error_message = rootUI.querySelector('#error_message');
-    
+
     password.disabled = username.disabled = server.disabled = true;
 
     let acc = {
@@ -25,7 +18,7 @@ async function save() {
         username: username.value,
         password: password.value
     };
-    log(`Set the account : server: ${acc.server}, username: ${acc.username} in account ${accountId}`);
+    console.info(`Set the account : server: ${acc.server}, username: ${acc.username} in account ${accountId}`);
 
     let s = new seafile.Seafile(acc.server, acc.username, acc.password);
     let p = await s.ping();
@@ -37,7 +30,7 @@ async function save() {
         password.type = "password";
 
     } else {
-        log("Can't set the account.");
+        console.warn("Can't set the account.");
         password.disabled = username.disabled = server.disabled = false;
         error_message.innerHTML = "The server is not reachable.";
     }
@@ -45,8 +38,10 @@ async function save() {
 }
 
 document.querySelector("#save").onclick = async () => {
+    console.group("Save account");
     let accountId = new URL(location.href).searchParams.get("accountId");
     await save();
+    console.groupEnd();
 };
 
 document.querySelector("#edit").onclick = async () => {
@@ -61,6 +56,8 @@ document.querySelector("#edit").onclick = async () => {
 
 
 browser.cloudFile.onAccountDeleted.addListener(async account => {
-    console.log(`account will be deleted :` + JSON.stringify(account));
+    console.group("Remove account");
+    console.info(`Account will be deleted :` + JSON.stringify(account));
     await browser.storage.local.remove(account.id);
+    console.groupEnd();
 });

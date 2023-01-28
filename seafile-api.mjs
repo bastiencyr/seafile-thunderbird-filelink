@@ -1,10 +1,3 @@
-let debug = true;
-
-function log(msg) {
-    if (debug)
-        console.log(msg);
-}
-
 class SeafileError extends Error {
     constructor(code, ...params) {
         super(...params);
@@ -34,8 +27,6 @@ class Seafile {
         this.username = username;
         this.token = "";
         this.headers = "";
-        log(`server = ${this.server}`);
-        log(`username = ${this.username}`);
     }
 
     async setToken(password) {
@@ -60,7 +51,6 @@ class Seafile {
                     'Accept': 'application/json',
                     mode: 'cors'
                 };
-                log(`Token set: ${this.token}`);
                 return this.token;
 
             } catch (e) {
@@ -126,7 +116,7 @@ class Seafile {
     async createLibraryIfNotExist() {
         let seafLib = await this.searchLibraryByName('thunderbird_attachments');
         if (!seafLib) {
-            log(`Create library thunderbird_attachments !`);
+            console.info(`Create library thunderbird_attachments !`);
             seafLib = await this.createLibrary('thunderbird_attachments');
         }
         return seafLib;
@@ -136,12 +126,12 @@ class Seafile {
 
         let endPoint = `${this.server}/api2/server-info/`;
         let res = await fetch(endPoint).then((response) => {
-            log(response);
+            console.info(response);
             if (response.ok)
                 return true;
             return false;
         }).catch((error) => {
-            log(error);
+            console.error(error);
             return false;
         });
         if (res)
@@ -238,7 +228,7 @@ class Seafile {
         });
         if (res.ok) {
             let links = await res.json();
-            if (links[0]) console.log(links[0]);
+            if (links[0]) console.info(links[0]);
             if (links.length > 0)
                 return links[0];
             else

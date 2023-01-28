@@ -1,10 +1,5 @@
 import * as seafile from './seafile-api.mjs';
-let debug2 = true;
 
-function log2(msg) {
-    if (debug2)
-        console.log(msg);
-}
 let uploads = new Map();
 
 const getSeafileAccount = async id =>
@@ -12,6 +7,7 @@ const getSeafileAccount = async id =>
     .then(accs => accs && accs[id]);
 
 browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
+    console.group("Upload file");
     let uploadInfo = {
         abortController: new AbortController()
     };
@@ -22,12 +18,11 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
     let {
         password,
         username,
-        server,
-        debugConsole
+        server
     } = await getSeafileAccount(account.id);
 
     let s = new seafile.Seafile(server, username);
-    let token = await s.setToken(password);
+    await s.setToken(password);
 
     //create library on the server, default one is "thunderbird_attachments"
     let seafLib = await s.createLibraryIfNotExist();
@@ -38,23 +33,23 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
     let downloadLink = await s.getDownloadLink(`/${fileName}`, repoId);
 
     delete uploadInfo.abortcontroller;
+    console.groupEnd();
     return {
         url: `${downloadLink.link}?dl=1`
     };
-
 });
 
 browser.cloudFile.onFileUploadAbort.addListener((account, id) => {
-    log(`File upload is getting aborted`);
+    console.info(`File upload is getting aborted`);
     let uploadInfo = uploads.get(id);
     if (uploadInfo && uploadInfo.abortController) {
-        log(`Abort abort !!`);
+        console.info(`Abort abort !!`);
         uploadInfo.abortController.abort();
     }
 });
 
 browser.cloudFile.onFileDeleted.addListener((account, fileId, tab) => {
-    log(`File deleted ` + JSON.stringify(fileId));
+    console.info(`File deleted ` + JSON.stringify(fileId));
 });
 
 browser.cloudFile.getAllAccounts().then(async (accounts) => {
@@ -68,5 +63,5 @@ browser.cloudFile.getAllAccounts().then(async (accounts) => {
 
 
 browser.cloudFile.onAccountAdded.addListener(account => {
-    log2(`Account has been added :` + JSON.stringify(account));
+    console.info(`Account has been added :` + JSON.stringify(account));
 });
