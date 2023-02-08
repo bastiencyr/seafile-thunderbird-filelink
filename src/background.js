@@ -1,4 +1,51 @@
-import * as seafile from './seafile-api.mjs';
+import * as seafile from '../seafile-api.mjs';
+const {
+    SeafileAPI
+} = require('seafile-js');
+
+class SeafileError extends Error {
+    constructor(code, ...params) {
+        super(...params);
+        if (Error.captureStackTrace)
+            Error.captureStackTrace(this, SeafileError);
+        this.name = 'SeafileError';
+        this.date = new Date();
+        this.code = code;
+
+    }
+}
+
+async function goErr(res) {
+    try {
+        let msg = await res.json();
+        throw new SeafileError(res.status, msg);
+    } catch (e) {
+        throw new SeafileError(res.status, res.statusText);
+    }
+}
+
+async function upload(endPoint, fileName, fileContent, token) {
+
+    let formEncoding = new FormData();
+    formEncoding.append('filename', fileName);
+    formEncoding.append('parent_dir', `/`);
+    formEncoding.append('file', fileContent);
+    let headers = {
+        'Authorization': `Token ${token}`,
+        'Accept': 'application/json',
+        mode: 'cors'
+    };
+    let res = await fetch(endPoint, {
+        method: 'POST',
+        headers: headers,
+        body: formEncoding
+    });
+    if (res.ok) {
+        let ups = await res.json();
+        return ups[0];
+    }
+    await goErr(res);
+}
 
 let uploads = new Map();
 
@@ -21,13 +68,31 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
         server
     } = await getSeafileAccount(account.id);
 
+    const seafileAPI = new SeafileAPI();
+    seafileAPI.init({
+        server: server,
+        username: username,
+        password: password
+    });
+
     let s = new seafile.Seafile(server, username);
     await s.setToken(password);
 
     //create library on the server, default one is "thunderbird_attachments"
     let seafLib = await s.createLibraryIfNotExist();
     let repoId = seafLib.id;
-    await s.upload(`/`, fileName, fileContent, repoId);
+
+    const response = await seafileAPI.login();
+    let endPoint2 = await seafileAPI.getFileServerUploadLink(repoId, "/");
+    let tok = await seafileAPI.getToken();
+    console.info(endPoint2.data);
+
+    try {
+        await upload(endPoint2.data, fileName, fileContent, tok);
+        console.groupEnd();
+    } catch (e) {
+        console.log(e);
+    }
 
     // Get the link
     let downloadLink = await s.getDownloadLink(`/${fileName}`, repoId);

@@ -45,3 +45,30 @@ at 0.
    
    A yellow message at screen's bottom allow you to use Filelink to store the
    attachement: just click `Link`
+
+## Development
+
+This extension use webpack. You need to install npm before.
+Then:
+
+```shell
+npm init -y
+npm install webpack webpack-cli --save-dev
+npm install seafile-js --save
+npx webpack
+```
+
+
+## Code quality
+
+Install first js-beautify and jshint with npm. Then you can check the code.
+
+```shell
+npm install js-beautify jshint --save-dev
+# run js-beautify
+js-beautify.js -r src/*.js
+js-beautify.js -r *.js
+js-beautify.js -r *.html
+# run jshint
+jshint src/*.js
+```

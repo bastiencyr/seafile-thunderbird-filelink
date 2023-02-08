@@ -4,6 +4,7 @@
     "description": "store attachments on a seafile share",
     "version": "0.0",
     "author": "Bastien Coco",
+    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
     "icons": {
         "64": "images/icon-64px.png",
         "32": "images/icon-32px.png",

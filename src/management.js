@@ -1,8 +1,10 @@
-import * as seafile from './seafile-api.mjs';
+const {
+    SeafileAPI
+} = require('seafile-js');
+
 
 async function save() {
 
-    // extract input value
     let rootUI = document.body;
     let accountId = new URL(location.href).searchParams.get("accountId");
 
@@ -10,29 +12,45 @@ async function save() {
     let username = rootUI.querySelector('#username');
     let password = rootUI.querySelector('#password');
     let error_message = rootUI.querySelector('#error_message');
-
     password.disabled = username.disabled = server.disabled = true;
 
-    let acc = {
+    const seafileAPI = new SeafileAPI();
+    seafileAPI.init({
         server: server.value,
         username: username.value,
         password: password.value
-    };
-    console.info(`Set the account : server: ${acc.server}, username: ${acc.username} in account ${accountId}`);
+    });
 
-    let s = new seafile.Seafile(acc.server, acc.username, acc.password);
-    let p = await s.ping();
-    if (p) {
+
+    try {
+        const response = await seafileAPI.login();
+        let acc = {
+            server: server.value,
+            username: username.value,
+            password: password.value
+        };
+        console.info(`Set the account : server: ${acc.server}, username: ${acc.username} in account ${accountId}`);
+
         error_message.innerHTML = "";
         await browser.storage.local.set({
             [accountId]: acc
         });
         password.type = "password";
-
-    } else {
+    } catch (error) {
         console.warn("Can't set the account.");
         password.disabled = username.disabled = server.disabled = false;
-        error_message.innerHTML = "The server is not reachable.";
+
+        if (error.response) {
+            console.log(error.response.data);
+            console.log(error.response.status);
+            console.log(error.response.headers);
+            error_message.innerHTML = "Wrong password or username.";
+        } else if (error.request) {
+            error_message.innerHTML = "Check your internet connection or your server address.";
+            console.log(error.request);
+        } else {
+            console.error('Error', error.message);
+        }
     }
 
 }
