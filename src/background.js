@@ -1,4 +1,3 @@
-import * as seafile from '../seafile-api.mjs';
 const {
     SeafileAPI
 } = require('seafile-js');
@@ -75,32 +74,56 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
         password: password
     });
 
-    let s = new seafile.Seafile(server, username);
-    await s.setToken(password);
-
-    //create library on the server, default one is "thunderbird_attachments"
-    let seafLib = await s.createLibraryIfNotExist();
-    let repoId = seafLib.id;
-
+    // login to set the token
     const response = await seafileAPI.login();
+    let tok = seafileAPI.token;
+
+    // create library if not exist
+    let ls_lib = await seafileAPI.listRepos();
+
+    function isLibAttachments(lib) {
+        return lib.repo_name === "thunderbird_attachments";
+    }
+    console.warn(ls_lib.data.repos.find(isLibAttachments));
+    let repoId;
+    if (ls_lib.data.repos.find(isLibAttachments) === undefined) {
+        try {
+            let repo = {
+                name: "thunderbird_attachments"
+            };
+            seafileAPI.createMineRepo(repo);
+        } catch (e) {
+            console.log(e);
+            console.groupEnd();
+        }
+    }
+
+    ls_lib = await seafileAPI.listRepos();
+    repoId = ls_lib.data.repos.find(isLibAttachments).repo_id;
+
     let endPoint2 = await seafileAPI.getFileServerUploadLink(repoId, "/");
-    let tok = await seafileAPI.getToken();
-    console.info(endPoint2.data);
+    console.log(seafileAPI.username, seafileAPI.password);
 
     try {
         await upload(endPoint2.data, fileName, fileContent, tok);
-        console.groupEnd();
     } catch (e) {
         console.log(e);
+        console.groupEnd();
     }
 
     // Get the link
-    let downloadLink = await s.getDownloadLink(`/${fileName}`, repoId);
+    try {
+        await seafileAPI.createShareLink(repoId, `/${fileName}`);
+    } catch (e) {
+        console.log(e);
+        console.groupEnd();
+    }
+    let downloadLink = await seafileAPI.getShareLink(repoId, `/${fileName}`);
 
     delete uploadInfo.abortcontroller;
     console.groupEnd();
     return {
-        url: `${downloadLink.link}?dl=1`
+        url: `${downloadLink.data[0].link}?dl=1`
     };
 });
 
