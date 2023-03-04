@@ -58,6 +58,17 @@ npm install seafile-js --save
 npx webpack
 ```
 
+## Publish the code to thunderbird
+
+After npm dependencies has been installed, you can generate the zip file that
+will be send to the Thunderbird team with the following commands:
+
+```shell
+bash publish.sh
+``` 
+
+You need to execute the publish.sh file in the root folder of this project. 
+A zip file will be generated in the parent folder.
 
 ## Code quality
 
