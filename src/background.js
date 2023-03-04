@@ -60,6 +60,9 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
     let fileName = fileInfo.name;
     let fileContent = fileInfo.data;
     uploads.set(fileInfo.id, uploadInfo);
+    console.log("File id: ", fileInfo.id);
+    console.info("Start uploading of the file: ", fileName);
+
     // retreive account from local storage
     let {
         password,
@@ -74,17 +77,28 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
         password: password
     });
 
-    // login to set the token
-    const response = await seafileAPI.login();
+    // Login to set the token
+    console.info("Login to the server ", server, " with username ", username);
+    try {
+        const response = await seafileAPI.login();
+    } catch (e) {
+        console.log(e);
+        return {
+            error: "Can't login to your seafile account. Check your internet" +
+                " connection or your credentials."
+        };
+        console.groupEnd();
+    }
+
     let tok = seafileAPI.token;
 
-    // create library if not exist
+    // Create library if not exist
+    console.info("Create library thunderbird_attachments on the server if not exist");
     let ls_lib = await seafileAPI.listRepos();
 
     function isLibAttachments(lib) {
         return lib.repo_name === "thunderbird_attachments";
     }
-    console.warn(ls_lib.data.repos.find(isLibAttachments));
     let repoId;
     if (ls_lib.data.repos.find(isLibAttachments) === undefined) {
         try {
@@ -94,6 +108,9 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
             seafileAPI.createMineRepo(repo);
         } catch (e) {
             console.log(e);
+            return {
+                error: "Can't create the library. Check your internet connection."
+            };
             console.groupEnd();
         }
     }
@@ -101,17 +118,25 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
     ls_lib = await seafileAPI.listRepos();
     repoId = ls_lib.data.repos.find(isLibAttachments).repo_id;
 
-    let endPoint2 = await seafileAPI.getFileServerUploadLink(repoId, "/");
-    console.log(seafileAPI.username, seafileAPI.password);
+    // Upload the file with the upload link
+    let endPoint = await seafileAPI.getFileServerUploadLink(repoId, "/");
 
+    let res;
     try {
-        await upload(endPoint2.data, fileName, fileContent, tok);
+        res = await upload(endPoint.data, fileName, fileContent, tok);
     } catch (e) {
         console.log(e);
+        return {
+            error: "Can't upload the file. Check your internet connection."
+        };
         console.groupEnd();
     }
+    // Update the filename in case of the server chose another filename 
+    // to avoid conflicts
+    fileName = res.name;
 
-    // Get the link
+    // Create and get the upload link
+    console.info("Create share link");
     try {
         await seafileAPI.createShareLink(repoId, `/${fileName}`);
     } catch (e) {
@@ -138,6 +163,7 @@ browser.cloudFile.onFileUploadAbort.addListener((account, id) => {
 
 browser.cloudFile.onFileDeleted.addListener((account, fileId, tab) => {
     console.info(`File deleted ` + JSON.stringify(fileId));
+    console.log(fileId);
 });
 
 browser.cloudFile.getAllAccounts().then(async (accounts) => {
