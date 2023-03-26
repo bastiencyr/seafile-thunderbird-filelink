@@ -7,7 +7,7 @@
       }
     },
     "description": "store attachments on a seafile share",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "author": "Bastien Coco",
     "icons": {
         "64": "images/icon-64px.png",
@@ -22,6 +22,6 @@
       "management_url": "management.html"
     },
     "permissions": [
-      "storage"
+      "storage", "*://*/*"
     ]
 }
