@@ -36,6 +36,7 @@ async function save() {
             [accountId]: acc
         });
         password.type = "password";
+        browser.cloudFile.updateAccount(accountId, {"configured": true});
     } catch (error) {
         console.warn("Can't set the account.");
         password.disabled = username.disabled = server.disabled = false;
