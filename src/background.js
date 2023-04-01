@@ -83,11 +83,11 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
         const response = await seafileAPI.login();
     } catch (e) {
         console.log(e);
+        console.groupEnd();
         return {
             error: "Can't login to your seafile account. Check your internet" +
                 " connection or your credentials."
         };
-        console.groupEnd();
     }
 
     let tok = seafileAPI.token;
@@ -108,10 +108,10 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
             seafileAPI.createMineRepo(repo);
         } catch (e) {
             console.log(e);
+            console.groupEnd();
             return {
                 error: "Can't create the library. Check your internet connection."
             };
-            console.groupEnd();
         }
     }
 
@@ -126,10 +126,10 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
         res = await upload(endPoint.data, fileName, fileContent, tok);
     } catch (e) {
         console.log(e);
+        console.groupEnd();
         return {
             error: "Can't upload the file. Check your internet connection."
         };
-        console.groupEnd();
     }
     // Update the filename in case of the server chose another filename 
     // to avoid conflicts

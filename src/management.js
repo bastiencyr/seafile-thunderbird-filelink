@@ -3,6 +3,29 @@ const {
 } = require('seafile-js');
 
 
+
+let rootUI = document.body;
+let server = rootUI.querySelector('#server');
+let username = rootUI.querySelector('#username');
+let accountId = new URL(location.href).searchParams.get("accountId");
+let password = rootUI.querySelector('#password');
+
+browser.storage.local.get([accountId]).then(accountInfo => {
+    if ("server" in accountInfo[accountId]) {
+        server.value = accountInfo[accountId].server;
+        server.disabled = true;
+    }
+    if ("username" in accountInfo[accountId]) {
+        username.value = accountInfo[accountId].username;
+        username.disabled = true;
+    }
+    if ("password" in accountInfo[accountId]) {
+        password.value = accountInfo[accountId].password;
+        password.type = "password";
+        password.disabled = true;
+    }
+});
+
 async function save() {
 
     let rootUI = document.body;
@@ -36,7 +59,9 @@ async function save() {
             [accountId]: acc
         });
         password.type = "password";
-        browser.cloudFile.updateAccount(accountId, {"configured": true});
+        browser.cloudFile.updateAccount(accountId, {
+            "configured": true
+        });
     } catch (error) {
         console.warn("Can't set the account.");
         password.disabled = username.disabled = server.disabled = false;
