@@ -58,6 +58,8 @@ npm install seafile-js --save
 npx webpack
 ```
 
+This repository use gitflow.
+
 ## Publish the code to thunderbird
 
 After npm dependencies has been installed, you can generate the zip file that
