@@ -61,7 +61,7 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
     let fileContent = fileInfo.data;
     uploads.set(fileInfo.id, uploadInfo);
     console.log("File id: ", fileInfo.id);
-    console.info("Start uploading of the file: ", fileName);
+    console.info("The following file will be uploaded: ", fileName);
 
     // retreive account from local storage
     let {
@@ -78,11 +78,11 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
     });
 
     // Login to set the token
-    console.info("Login to the server ", server, " with username ", username);
+    console.info("Login to the server ", server, " with username ", username, " ...");
     try {
         const response = await seafileAPI.login();
     } catch (e) {
-        console.error("Can't login !")
+        console.error("Can't login !");
         console.log(e);
         console.groupEnd();
         return {
@@ -94,7 +94,7 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
     let tok = seafileAPI.token;
 
     // Create library if not exist
-    console.info("Create library thunderbird_attachments on the server if not exist");
+    console.info("Create library thunderbird_attachments on the server if not exist...");
     let ls_lib;
     try {
         ls_lib = await seafileAPI.listRepos();
@@ -131,6 +131,7 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
     repoId = ls_lib.data.repos.find(isLibAttachments).repo_id;
 
     // Upload the file with the upload link
+    console.info("Upload the file...");
     let endPoint = await seafileAPI.getFileServerUploadLink(repoId, "/");
 
     let res;
@@ -149,7 +150,7 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
     fileName = res.name;
 
     // Create and get the upload link
-    console.info("Create share link");
+    console.info("Create share link and get download link...");
     try {
         await seafileAPI.createShareLink(repoId, `/${fileName}`);
     } catch (e) {
