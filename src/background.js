@@ -82,6 +82,7 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
     try {
         const response = await seafileAPI.login();
     } catch (e) {
+        console.error("Can't login !")
         console.log(e);
         console.groupEnd();
         return {
@@ -94,8 +95,18 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
 
     // Create library if not exist
     console.info("Create library thunderbird_attachments on the server if not exist");
-    let ls_lib = await seafileAPI.listRepos();
-
+    let ls_lib;
+    try {
+        ls_lib = await seafileAPI.listRepos();
+    } catch (e) {
+        console.error("Can't list remote libraries !");
+        console.log(e);
+        console.groupEnd();
+        return {
+            error: "Can't list the libraries on your seafile account. Check your internet connection."
+        };
+    }
+    
     function isLibAttachments(lib) {
         return lib.repo_name === "thunderbird_attachments";
     }
@@ -107,6 +118,7 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
             };
             seafileAPI.createMineRepo(repo);
         } catch (e) {
+            console.error("Can't create the attachment library !");
             console.log(e);
             console.groupEnd();
             return {
@@ -125,6 +137,7 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
     try {
         res = await upload(endPoint.data, fileName, fileContent, tok);
     } catch (e) {
+        console.error("Can't upload the file !");
         console.log(e);
         console.groupEnd();
         return {
@@ -140,8 +153,12 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
     try {
         await seafileAPI.createShareLink(repoId, `/${fileName}`);
     } catch (e) {
-        console.log(e);
+        console.log("Can't create the share link !");
+        console.error(e);
         console.groupEnd();
+        return {
+            error: "Can't create the share link. Check your internet connection."
+        };
     }
     let downloadLink = await seafileAPI.getShareLink(repoId, `/${fileName}`);
 
