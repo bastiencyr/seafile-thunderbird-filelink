@@ -2,6 +2,7 @@ const {
     SeafileAPI
 } = require('seafile-js');
 
+var semver = require('semver');
 
 
 let rootUI = document.body;
@@ -36,6 +37,35 @@ async function save() {
     let password = rootUI.querySelector('#password');
     let error_message = rootUI.querySelector('#error_message');
     password.disabled = username.disabled = server.disabled = true;
+
+    try {
+        let endpoint_server_info = server.value + "/api2/server-info/";
+        console.log(endpoint_server_info);
+        let response = await fetch(endpoint_server_info);
+        if (response.ok) {
+            let json_response = await response.json();
+            let seafile_version = json_response.version;
+            if (!semver.satisfies(seafile_version, ">=7.0.0")) {
+                console.error("Seafile server version is below 7.0.0.");
+                error_message.innerHTML = "The seafile server version is " +
+                    seafile_version +
+                    " but the minimum supported version is 7.0.0.";
+                return;
+            }
+        } else {
+            // message
+            console.log(response);
+            error_message.innerHTML =
+                "Can't get server information from your seafile instance. " +
+                "This plugin supports seafile server starting at version 6.";
+            return;
+        }
+    } catch (error) {
+        error_message.innerHTML =
+            "Can't fetch server information. " 
+            + "Maybe the Seafile server adress is wrong or your internet connection is down";
+        return;
+    }
 
     const seafileAPI = new SeafileAPI();
     seafileAPI.init({

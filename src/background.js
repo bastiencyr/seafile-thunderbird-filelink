@@ -34,11 +34,18 @@ async function upload(endPoint, fileName, fileContent, token) {
         'Accept': 'application/json',
         mode: 'cors'
     };
-    let res = await fetch(endPoint, {
-        method: 'POST',
-        headers: headers,
-        body: formEncoding
-    });
+    let res;
+    try {
+        res = await fetch(endPoint, {
+            method: 'POST',
+            headers: headers,
+            body: formEncoding
+        });
+    } catch (e) {
+        console.log(endPoint);
+        console.log(e);
+        throw "Fail to upload in fetch";
+    }
     if (res.ok) {
         let ups = await res.json();
         return ups[0];
@@ -106,7 +113,7 @@ browser.cloudFile.onFileUpload.addListener(async (account, fileInfo, tab) => {
             error: "Can't list the libraries on your seafile account. Check your internet connection."
         };
     }
-    
+
     function isLibAttachments(lib) {
         return lib.repo_name === "thunderbird_attachments";
     }
