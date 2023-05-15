@@ -93,7 +93,7 @@ async function save() {
             "configured": true
         });
     } catch (error) {
-        console.warn("Can't set the account.");
+        console.error("Can't set the account.");
         password.disabled = username.disabled = server.disabled = false;
 
         if (error.response) {
