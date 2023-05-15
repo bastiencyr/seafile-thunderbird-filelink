@@ -1,0 +1,38 @@
+name: Tests Seafile version 7
+on: push
+
+jobs:
+  # Label of the container job
+  container-job:
+    # Containers must run in Linux based operating systems
+    runs-on: ubuntu-latest
+
+    # Service containers to run with `container-job`
+    services:
+      db:
+        image: mariadb:10.6
+        env:
+          MYSQL_ROOT_PASSWORD: db_dev  # Requested, set the root's password of MySQL service.
+          MYSQL_LOG_CONSOLE: true
+          
+      memcached:
+        image: memcached:1.6.18
+        
+      # Label used to access the service container
+      seafile:
+        # Docker Hub image
+        image: seafileltd/seafile-mc:7.0.4
+        env:
+          DB_HOST: db
+          DB_ROOT_PASSWD: db_dev  # Requested, the value shuold be root's password of MySQL service.
+          SEAFILE_ADMIN_EMAIL: me@example.com # Specifies Seafile admin user, default is 'me@example.com'.
+          SEAFILE_ADMIN_PASSWORD: asecret     # Specifies Seafile admin password, default is 'asecret'.
+          SEAFILE_SERVER_LETSENCRYPT: false   # Whether to use https or not.
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 80:80
+            
+    steps:
+      - name: Seafile version
+        run: sleep 10s && wget http://localhost/api2/server-info && cat server-info
+          
