@@ -2,7 +2,7 @@ name: Tests Seafile version 7
 on: push
 
 jobs:
-  # Label of the container job
+  # Label of the container jobs
   container-job:
     # Containers must run in Linux based operating systems
     runs-on: ubuntu-latest
